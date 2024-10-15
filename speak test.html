@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech Test</title>
+    <style>
+        /* Reset default styles */
+        body, h1, p, button {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #wordToSpeak {
+            font-size: 24px;
+            margin: 20px 0;
+        }
+
+        #feedback {
+            margin-top: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .animation {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto;
+            border-radius: 50%;
+            background-color: transparent;
+            transition: background-color 0.5s;
+        }
+
+        .correct {
+            background-color: #28a745; /* Green for success */
+        }
+
+        .incorrect {
+            background-color: #dc3545; /* Red for error */
+        }
+
+        #resultText {
+            font-size: 18px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Speech Test</h1>
+        <p id="wordToSpeak">Word will appear here</p>
+        <button id="startButton">Start Test</button>
+        <div id="feedback" class="hidden">
+            <div id="animation" class="animation"></div>
+            <p id="resultText"></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('startButton').addEventListener('click', startTest);
+
+        const complexWords = [
+            'She sells seashells by the seashore',
+            'Red leather yellow leather',
+            'Peter Piper picked a peck of pickled peppers',
+            'Toy boat toy boat toy boat',
+            'I scream you scream we all scream for ice cream',
+            'Blue bluebird blinks',
+            'Tim the tall tailor trims tall trees',
+            'A proper copper coffee pot',
+            'Betty Botter bought some butter',
+            'Speak will speak'
+        ];
+
+        function getRandomWord() {
+            const randomIndex = Math.floor(Math.random() * complexWords.length);
+            return complexWords[randomIndex];
+        }
+
+        function startTest() {
+            const feedbackElement = document.getElementById('feedback');
+            const resultText = document.getElementById('resultText');
+            const animation = document.getElementById('animation');
+            const wordElement = document.getElementById('wordToSpeak');
+            
+            // Get a random complex word
+            const wordToSpeak = getRandomWord();
+            wordElement.textContent = wordToSpeak;
+            
+            // Set up speech recognition
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+            
+            // Start speech recognition
+            recognition.start();
+            
+            recognition.onresult = (event) => {
+                const spokenText = event.results[0][0].transcript.toLowerCase();
+                console.log(`You said: ${spokenText}`);
+                
+                if (spokenText === wordToSpeak.toLowerCase()) {
+                    resultText.textContent = 'Correct pronunciation!';
+                    animation.className = 'animation correct';
+                } else {
+                    resultText.textContent = 'Incorrect pronunciation. Try again.';
+                    animation.className = 'animation incorrect';
+                }
+                
+                feedbackElement.classList.remove('hidden');
+            };
+            
+            recognition.onerror = (event) => {
+                resultText.textContent = 'Error occurred: ' + event.error;
+                feedbackElement.classList.remove('hidden');
+            };
+        }
+    </script>
+</body>
+</html>
